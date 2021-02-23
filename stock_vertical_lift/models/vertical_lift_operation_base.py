@@ -22,8 +22,8 @@ def split_other_move_lines(move, move_lines):
     other_move_lines = move.move_line_ids - move_lines
     if other_move_lines or move.state == "partially_available":
         qty_to_split = move.product_uom_qty - sum(move_lines.mapped("product_uom_qty"))
-        backorder_move_id = move._split(qty_to_split)
-        backorder_move = move.browse(backorder_move_id)
+        backorder_move_vals = move._split(qty_to_split)
+        backorder_move = move.create(backorder_move_vals)
         backorder_move.move_line_ids = other_move_lines
         backorder_move._recompute_state()
         backorder_move._action_assign()
@@ -77,7 +77,7 @@ def extract_and_action_done(move):
             )
             new_picking.action_assign()
             assert new_picking.state == "assigned"
-        new_picking.action_done()
+        new_picking._action_done()
     return True
 
 
@@ -304,7 +304,7 @@ class VerticalLiftOperationBase(models.AbstractModel):
     def _render_product_packagings(self, product):
         if not product:
             return ""
-        return self.env["ir.qweb"].render(
+        return self.env["ir.qweb"]._render(
             "stock_vertical_lift.packagings",
             self._prepare_values_for_product_packaging(product),
         )
