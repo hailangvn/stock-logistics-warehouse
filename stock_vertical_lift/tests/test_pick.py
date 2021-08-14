@@ -118,9 +118,16 @@ class TestPick(VerticalLiftCase):
         product1 = self.env.ref("stock_vertical_lift.product_running_socks")
         product2 = self.env.ref("stock_vertical_lift.product_recovery_socks")
         # cancel the picking from demo data to start from a clean state
-        self.env.ref(
+        picking_1 = self.env.ref(
             "stock_vertical_lift.stock_picking_out_demo_vertical_lift_1"
-        ).action_cancel()
+        )
+        # If stock_picking_cancel_confirm is installed, we need to explicitly
+        # confirm the cancellation.
+        try:
+            picking_1.cancel_confirm = True
+        except AttributeError:
+            pass
+        picking_1.action_cancel()
 
         # ensure that we have stock in some cells, we'll put product1
         # in the first Shuttle and product2 in the second
