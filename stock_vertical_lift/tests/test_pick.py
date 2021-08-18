@@ -188,6 +188,8 @@ class TestPick(VerticalLiftCase):
     def test_on_barcode_scanned(self):
         operation = self._open_screen("pick")
         self.assertEqual(operation.state, "scan_destination")
+        # Scan wrong one first for test coverage
+        operation.on_barcode_scanned("test")
         move_line = operation.current_move_line_id
         current_destination = move_line.location_dest_id
         stock_location = self.env.ref("stock.stock_location_stock")
@@ -197,6 +199,9 @@ class TestPick(VerticalLiftCase):
         operation.on_barcode_scanned(stock_location.barcode)
         self.assertEqual(move_line.location_dest_id, stock_location)
         self.assertEqual(operation.state, "save")
+        # Done for test coverage
+        operation.button_save()
+        operation.on_barcode_scanned("test")
 
     def test_button_release(self):
         self._open_screen("pick")
