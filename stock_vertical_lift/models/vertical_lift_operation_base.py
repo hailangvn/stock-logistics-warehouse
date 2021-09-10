@@ -24,6 +24,7 @@ def split_other_move_lines(move, move_lines):
         qty_to_split = move.product_uom_qty - sum(move_lines.mapped("product_uom_qty"))
         backorder_move_vals = move._split(qty_to_split)
         backorder_move = move.create(backorder_move_vals)
+        backorder_move._action_confirm(merge=False)
         backorder_move.move_line_ids = other_move_lines
         backorder_move._recompute_state()
         backorder_move._action_assign()
