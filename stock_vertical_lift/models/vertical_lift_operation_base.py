@@ -12,6 +12,7 @@ _logger = logging.getLogger(__name__)
 
 
 # The following methods have been copied from 'shopfloor' module (OCA/wms)
+# https://github.com/OCA/wms/blob/14.0/shopfloor/models/stock_move.py#L19
 # TODO: we should move them in a generic module
 
 
@@ -24,6 +25,8 @@ def split_other_move_lines(move, move_lines):
         qty_to_split = move.product_uom_qty - sum(move_lines.mapped("product_uom_qty"))
         backorder_move_vals = move._split(qty_to_split)
         backorder_move = move.create(backorder_move_vals)
+        if not backorder_move:
+            return False
         backorder_move._action_confirm(merge=False)
         backorder_move.move_line_ids = other_move_lines
         backorder_move._recompute_state()
@@ -44,7 +47,7 @@ def extract_and_action_done(move):
     # in their own move (which will be then 'confirmed')
     partial_moves = move.filtered(lambda m: m.state == "partially_available")
     for partial_move in partial_moves:
-        partial_move.split_other_move_lines(partial_move.move_line_ids)
+        split_other_move_lines(partial_move, partial_move.move_line_ids)
     # Process assigned moves
     moves = move.filtered(lambda m: m.state == "assigned")
     if not moves:
